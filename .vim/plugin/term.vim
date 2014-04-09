@@ -112,3 +112,36 @@ if s:screen || s:xterm
   cnoremap <Esc>[200~ <nop>
   cnoremap <Esc>[201~ <nop>
 endif
+
+function! s:NavigateSplits(direction)
+  let l:oldwin = winnr()
+  execute 'wincmd ' . a:direction
+  if l:oldwin == winnr() " at edge
+    if s:tmux
+      execute "silent !sh -c 'sleep 0.01; navigate-splits skipvim " . a:direction . "' &"
+      redraw!
+    else
+      execute '999wincmd ' . tr(a:direction, 'hjkl', 'lkjh')
+    endif
+  endif
+endfunction
+
+nnoremap <silent> <C-h> :call <SID>NavigateSplits('h')<CR>
+nnoremap <silent> <C-j> :call <SID>NavigateSplits('j')<CR>
+nnoremap <silent> <C-k> :call <SID>NavigateSplits('k')<CR>
+nnoremap <silent> <C-l> :call <SID>NavigateSplits('l')<CR>
+
+inoremap <silent> <C-h> <c-o>:call <SID>NavigateSplits('h')<CR>
+inoremap <silent> <C-j> <c-o>:call <SID>NavigateSplits('j')<CR>
+inoremap <silent> <C-k> <c-o>:call <SID>NavigateSplits('k')<CR>
+inoremap <silent> <C-l> <c-o>:call <SID>NavigateSplits('l')<CR>
+
+vnoremap <silent> <C-h> <Esc>:call <SID>NavigateSplits('h')<CR>
+vnoremap <silent> <C-j> <Esc>:call <SID>NavigateSplits('j')<CR>
+vnoremap <silent> <C-k> <Esc>:call <SID>NavigateSplits('k')<CR>
+vnoremap <silent> <C-l> <Esc>:call <SID>NavigateSplits('l')<CR>
+
+cnoremap <silent> <C-h> <c-\>e<SID>NavigateSplits('h')<CR>
+cnoremap <silent> <C-j> <c-\>e<SID>NavigateSplits('j')<CR>
+cnoremap <silent> <C-k> <c-\>e<SID>NavigateSplits('k')<CR>
+cnoremap <silent> <C-l> <c-\>e<SID>NavigateSplits('l')<CR>

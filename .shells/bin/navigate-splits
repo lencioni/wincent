@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# based on:
+#   http://www.reddit.com/r/vim/comments/22ixkq/navigate_around_vim_and_tmux_panes_painlessly/cgnnnai
+
+function inside_vim() {
+  tmux display-message -p '#{pane_current_command}' | grep -iqE '(^|\/)vim(diff)?$'
+}
+
+function opposite() {
+  echo $1 | tr 'hjkl' 'lkjh'
+}
+
+function to_tmux() {
+  echo $1 | tr 'hjkl' 'LDUR'
+}
+
+if [[ $1 == 'skipvim' ]]
+then
+  skipvim=1
+  shift
+fi
+
+if [[ $skipvim != 1 ]] && inside_vim
+then
+  tmux send-keys 'C-'$1
+else
+  tmux select-pane -$(to_tmux $1)
+  if inside_vim
+  then
+    tmux send-keys '999:wincmd ' $(opposite $1) C-m
+  fi
+fi
